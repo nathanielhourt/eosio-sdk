@@ -25,3 +25,4 @@ cp bin/s2wasm ../eosiosdk/bin
 cd ..
 
 cp -r eoslib eosiosdk/include
+cp eoscpp eosiosdk/bin
