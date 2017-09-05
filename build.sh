@@ -24,5 +24,7 @@ make -j4 s2wasm
 cp bin/s2wasm ../eosiosdk/bin
 cd ..
 
-cp -r eoslib eosiosdk/include
+cp -r eoslib eosiosdk/include/
 cp eoscpp eosiosdk/bin
+mkdir -p eosiosdk/share/eosiocontract
+cp -r skeleton eosiosdk/share/eosiocontract/ 

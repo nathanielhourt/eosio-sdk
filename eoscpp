@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 SDKDIR="$( dirname "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )" )"
 
@@ -8,11 +8,27 @@ function copy_skeleton {
 }
 
 function build_contract {
-    echo "TODO: build $1"
+    output=`basename $1`
+    shift
+
+    workdir=`mktemp -d`
+    mkdir $workdir/built
+
+    for file in $@; do
+        name=`basename $file`
+        filePath=`dirname $file`
+        $SDKDIR/bin/clang++ -emit-llvm -O3 --std=c++14 --target=wasm32 -ffreestanding -nostdlib -fno-threadsafe-statics -fno-rtti -fno-exceptions -I $SDKDIR/include -I $filePath -c $file -o $workdir/built/$name
+    done
+
+    $SDKDIR/bin/llvm-link -o $workdir/linked.bc $workdir/built/*
+    $SDKDIR/bin/llc --asm-verbose=false -o $workdir/assembly.s $workdir/linked.bc
+    $SDKDIR/bin/s2wasm -o $output -s 1024 $workdir/assembly.s
+
+    rm -rf $workdir
 }
 
 function print_help {
-    echo "Usage: $0 contract.cpp"
+    echo "Usage: $0 output.wast contract.cpp [other.cpp ...]"
     echo "       OR"
     echo "       $0 -n mycontract"
     echo
@@ -53,11 +69,11 @@ while true; do
 done
 
 if [[ "x" == "x$newname" ]]; then
-    if [[ $# -ne 1 ]]; then
+    if [[ $# -le 1 ]]; then
         print_help
         exit 1
     fi
-    build_contract $1
+    build_contract $@
 else
     if [[ $# -ne 0 ]]; then
         print_help
