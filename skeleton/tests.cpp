@@ -34,6 +34,8 @@
 
 #include <fc/crypto/digest.hpp>
 
+#include <boost/asio/buffer.hpp>
+
 #include "testing/database_fixture.hpp"
 #include "currency.wast.hpp"
 
@@ -49,7 +51,19 @@ BOOST_FIXTURE_TEST_CASE(currency_test, testing_fixture) {
       chain.set_auto_sign_transactions(true);
 
       Make_Account(chain, currency);
+      Make_Account(chain, user);
+      chain.produce_blocks();
       Set_Code(chain, currency, currency_wast);
+
+      SignedTransaction trx;
+      trx.scope = sort_names({"currency", "user"});
+      trx.expiration = chain.head_block_time() + 100;
+      transaction_set_reference_block(trx, chain.head_block_id());
+
+      // TODO: put a transfer message in the transaction.
+      // How?
+
+      chain.push_transaction(trx);
    } FC_LOG_AND_RETHROW()
 }
 
