@@ -8,7 +8,7 @@ function copy_skeleton {
 }
 
 function build_contract {
-    output=`basename $1`
+    output=$1
     shift
 
     workdir=`mktemp -d`
@@ -22,6 +22,7 @@ function build_contract {
 
     $SDKDIR/bin/llvm-link -o $workdir/linked.bc $workdir/built/*
     $SDKDIR/bin/llc --asm-verbose=false -o $workdir/assembly.s $workdir/linked.bc
+    echo $SDKDIR/bin/s2wasm -o $output -s 1024 $workdir/assembly.s
     $SDKDIR/bin/s2wasm -o $output -s 1024 $workdir/assembly.s
 
     rm -rf $workdir

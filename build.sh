@@ -5,6 +5,7 @@ mkdir eosbuild
 cd eosbuild
 cmake ../eos -DCMAKE_INSTALL_PREFIX=../eosiosdk
 make -j4 install
+cp libraries/wasm-jit/Source/{Logging,IR,WAST,WASM,Runtime,Platform}/lib* ../eosiosdk/lib
 cd ..
 
 git clone --depth 1 --single-branch --branch release_40 https://github.com/llvm-mirror/llvm.git
@@ -13,7 +14,7 @@ git clone --depth 1 --single-branch --branch release_40 https://github.com/llvm-
 mkdir ../../llvmbuild
 cd ../../llvmbuild
 cmake -DCMAKE_INSTALL_PREFIX=../eosiosdk -DLLVM_TARGETS_TO_BUILD= -DLLVM_EXPERIMENTAL_TARGETS_TO_BUILD=WebAssembly -DCMAKE_BUILD_TYPE=Release ../llvm
-make -j4 install-llvm-config install-clang install-llvm-link install-llc
+make -j4 install #-llvm-config install-clang install-llvm-link install-llc
 cd ..
 
 git clone https://github.com/WebAssembly/binaryen
