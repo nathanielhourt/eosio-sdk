@@ -30,6 +30,8 @@
 #include <eos/chain/key_value_object.hpp>
 #include <eos/chain/block_summary_object.hpp>
 
+#include <eos/types/AbiSerializer.hpp>
+
 #include <eos/utilities/tempdir.hpp>
 
 #include <fc/crypto/digest.hpp>
@@ -57,6 +59,8 @@ BOOST_FIXTURE_TEST_CASE(currency_test, testing_fixture) {
       chain.produce_blocks();
       Set_Code(chain, currency, currency_wast, currency_abi);
 
+      auto serial = types::AbiSerializer(fc::json::from_string(currency_abi).as<types::Abi>());
+
       // Transfer 500 tokens from currency to user
       SignedTransaction trx;
       trx.scope = sort_names({"currency", "user"});
@@ -70,6 +74,11 @@ BOOST_FIXTURE_TEST_CASE(currency_test, testing_fixture) {
                                              serialMessage);
       transaction_set_reference_block(trx, chain.head_block_id());
       chain.push_transaction(trx);
+
+      auto userRecord = chain_db.get<key_value_object, by_scope_primary>(boost::make_tuple("user", "currency",
+                                                                                           "account", "account"));
+      auto userBalance = serial.binaryToVariant("UInt64", {userRecord.value.begin(), userRecord.value.end()});
+      BOOST_CHECK_EQUAL(userBalance.as_uint64(), 500);
    } FC_LOG_AND_RETHROW()
 }
 
