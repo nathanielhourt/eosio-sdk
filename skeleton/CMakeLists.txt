@@ -5,4 +5,4 @@ include(eosio)
 
 set(SOURCE_FILES "currency.cpp")
 set(TEST_SOURCES "tests.cpp")
-add_contract_target(currency "${SOURCE_FILES}" "${TEST_SOURCES}" ${CMAKE_CURRENT_BINARY_DIR})
+add_contract_target(currency "${SOURCE_FILES}" "${TEST_SOURCES}" "currency.abi" ${CMAKE_CURRENT_BINARY_DIR})

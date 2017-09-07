@@ -178,6 +178,8 @@
  * @code{.cpp}
  * char* wast = //...
  * Set_Code(chain, codeacct, wast);
+ * char* abi = //...
+ * Set_Code(chain, codeacct, wast, abi);
  * @endcode
  */
 #define Set_Code(...) BOOST_PP_OVERLOAD(SETCODE, __VA_ARGS__)(__VA_ARGS__)

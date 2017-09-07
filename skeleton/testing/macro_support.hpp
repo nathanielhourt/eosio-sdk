@@ -74,17 +74,22 @@ inline std::vector<Name> sort_names( std::vector<Name>&& names ) {
 #define MKACCT7(chain, name, creator, deposit, owner, active, recovery) \
    MKACCT_IMPL(chain, name, creator, owner, active, recovery, deposit)
 
-#define SETCODE3(chain, acct, wast) \
+#define SETCODE4(chain, acct, wast, abistring) \
    { \
       auto wasm = eos::utilities::assemble_wast(wast); \
       types::setcode handler; \
       handler.account = #acct; \
       handler.code.assign(wasm.begin(), wasm.end()); \
+      handler.abi = fc::json::from_string(abistring).as<types::Abi>(); \
       eos::chain::SignedTransaction trx; \
       trx.scope = sort_names({config::EosContractName, #acct}); \
       transaction_emplace_message(trx, config::EosContractName, vector<types::AccountPermission>{{#acct,"active"}}, \
                                   "setcode", handler); \
+      trx.expiration = chain.head_block_time() + 100; \
+      transaction_set_reference_block(trx, chain.head_block_id()); \
+      chain.push_transaction(trx); \
    }
+#define SETCODE3(chain, acct, wast) SETCODE4(chain, acct, wast, "")
 
 #define SETAUTH5(chain, account, authname, parentname, auth) \
    { \

@@ -46,23 +46,29 @@ BOOST_AUTO_TEST_SUITE(currency_tests)
 
 BOOST_FIXTURE_TEST_CASE(currency_test, testing_fixture) {
    try {
+      // Create the chain, configure testing options
       Make_Blockchain(chain);
       chain.set_skip_transaction_signature_checking(false);
       chain.set_auto_sign_transactions(true);
 
+      // Create some accounts to work with, and publish the code
       Make_Account(chain, currency);
       Make_Account(chain, user);
       chain.produce_blocks();
-      Set_Code(chain, currency, currency_wast);
+      Set_Code(chain, currency, currency_wast, currency_abi);
 
+      // Transfer 500 tokens from currency to user
       SignedTransaction trx;
       trx.scope = sort_names({"currency", "user"});
       trx.expiration = chain.head_block_time() + 100;
+      auto serialMessage = chain.message_to_binary("currency", "transfer",
+                                                   fc::mutable_variant_object("from", "currency")
+                                                                             ("to", "user")
+                                                                             ("quantity", 500));
+      transaction_emplace_serialized_message(trx, "currency", "transfer",
+                                             vector<types::AccountPermission>{{"currency", "active"}},
+                                             serialMessage);
       transaction_set_reference_block(trx, chain.head_block_id());
-
-      // TODO: put a transfer message in the transaction.
-      // How?
-
       chain.push_transaction(trx);
    } FC_LOG_AND_RETHROW()
 }

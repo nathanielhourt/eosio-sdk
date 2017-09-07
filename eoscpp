@@ -22,7 +22,6 @@ function build_contract {
 
     $SDKDIR/bin/llvm-link -o $workdir/linked.bc $workdir/built/*
     $SDKDIR/bin/llc --asm-verbose=false -o $workdir/assembly.s $workdir/linked.bc
-    echo $SDKDIR/bin/s2wasm -o $output -s 1024 $workdir/assembly.s
     $SDKDIR/bin/s2wasm -o $output -s 1024 $workdir/assembly.s
 
     rm -rf $workdir
@@ -37,8 +36,6 @@ function print_help {
     echo "   -n | --newcontract [name]"
     echo "      Create a new contract in the [name] folder, based on the example contract"
 }
-
-echo Using SDK at $SDKDIR
 
 OPTIONS=$(getopt --options=hn: --longoptions=help,newcontract: --name "$0" -- "$@")
 if [[ $? -ne 0 ]]; then
